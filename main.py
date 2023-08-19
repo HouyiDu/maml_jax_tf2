@@ -1,58 +1,29 @@
 import sys
 import os
 
-import argparse
+from sinusoid_data_generator import SinusoidDataGenerator
+
+def main():
+    test_num_updates = 5
+
+    update_batch_size = 10 #number of examples used for inner gradient update (K for K-shot learning).
+    meta_batch_size = 25 #number of tasks sampled per meta-update
+    data_generator = SinusoidDataGenerator(update_batch_size*2, meta_batch_size)
+
+    output_dimension = data_generator.output_dimension
+
+    baseline = None
+
+    if baseline == 'oracle':
+        pass
+    input_dimension = data_generator.input_dimension
 
 
 
-class App(object):
-    def run(self, args):
-        name = os.path.basename(args[0])
-        parser = self.create_parser(name)
+    tf_data_load = False
+    input_tensors = None
+    train =True
 
-        opts = parser.parse_args(args[1:])
-        self.opts = opts
-        return self.main(name, opts)
+    model = MAML(dim_input, dim_output, test_num_updates=test_num_updates)
+
     
-    def create_parser(self, name):
-        p = argparse.ArgumentParser(prog=name,
-                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                    description='specify aruguments of MAML')
-        p.add_argument('--dataset',
-                       type=str,
-                       choices=['miniimagenet', 'omniglot', 'sinusoid'])
-        p.add_argument('--logdir',
-                       type=str, 
-                       default=None)
-        p.add_argument('--baseline',
-                       type=str,
-                       choices=['None', 'oracle'])
-        
-        g = p.add_argument_group('training details')
-        g.add_argument('--pretrain_iterations',
-                       type=int,
-                       default=70000)
-        g.add_argument('--meta_iterations',
-                       type=int,
-                       default=0)
-        g.add_argument('--update_batch_size',
-                        type=int,
-                        default=10)
-        g.add_argument('--norm',
-                        type=str,
-                        default='None',
-                        choices=['batch_norm', 'batch_norm', 'layer_norm', 'None'])
-        
-        return p
-    
-    def main(self, name, opts):
-        #suppose we only use sinusoid dataset, now setup all the variables for that
-
-        if opts.dataset == 'sinusoid':
-            if opts.train == True:
-                test_num_updates = 5
-
-
-if __name__ == '__main__':
-    app = App()
-    app.run(sys.argv)

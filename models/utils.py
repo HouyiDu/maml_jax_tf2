@@ -54,11 +54,11 @@ class DenseNet(tf.keras.Model):
         super().__init__()
 
         self.initializer = tf.keras.initializers.TruncatedNormal(mean=0., stddev=0.01)
-        self.dense1 = tf.keras.layers.Dense(hidden_dim, 
+        self.dense1 = tf.keras.layers.Dense(hidden_dim[0], 
                                   activation='relu', 
                                   kernel_initializer=self.initializer,
                                   bias_initializer='zeros')
-        self.dense2 = tf.keras.layers.Dense(hidden_dim, 
+        self.dense2 = tf.keras.layers.Dense(hidden_dim[1], 
                                   activation='relu', 
                                   kernel_initializer=self.initializer,
                                   bias_initializer='zeros')
@@ -74,4 +74,34 @@ class DenseNet(tf.keras.Model):
         return self.classifier(x)
 
     def train_step(self, data):
+        x_a, x_b, y_a, y_b = data
+
+        task_output_b, task_losses_b = [], []
+
+        with tf.GradientTape() as tape:
+            task_output_a =  self(x_a) #forward pass
+            task_loss_a = self.compute_loss(y = y_a, y_pred = task_output_a) #loss
+
+        trainable_vars = self.trainable_variables
+        gradients = tape.gradient(task_loss_a, trainable_vars)
+
+        # fast_trainbale_vars = [v for v in trainable_vars] #if trainable_weights is a list
+        # fast_weights = self.optimizer.apply_gradients(zip(gradients, fast_trainbale_vars))
+
+        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+        output = self(x_b)
+        task_output_b.append(output)
+        task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
+
+        for i in range(5 - 1): #change this 5 to a variable passsed to this class as a self.var in the future
+            loss = self.compute_loss(y = y_a, y_pred = self(x_a))
+            gradients = tape.gradient(loss, trainable_vars)
+            self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+            output = self(x_b)
+            task_output_b.append(output)
+            task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
+
+        task_output = [task_output_a, task_output_b, task_loss_a, task_losses_b]
+
+
         pass
