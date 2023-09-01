@@ -54,7 +54,7 @@ class DenseNet(tf.keras.Model):
         super().__init__()
 
         self.initializer = tf.keras.initializers.TruncatedNormal(mean=0., stddev=0.01)
-        self.dense1 = tf.keras.layers.Dense(hidden_dim[0], 
+        self.dense1 = tf.keras.layers.Dense(hidden_dim[0],
                                   activation='relu', 
                                   kernel_initializer=self.initializer,
                                   bias_initializer='zeros')
@@ -63,7 +63,7 @@ class DenseNet(tf.keras.Model):
                                   kernel_initializer=self.initializer,
                                   bias_initializer='zeros')
         
-        self.classifier = tf.keras.layers.Dense(out_dim, 
+        self.classifier = tf.keras.layers.Dense(out_dim,
                                   activation=None, 
                                   kernel_initializer=self.initializer,
                                   bias_initializer='zeros')
@@ -73,35 +73,38 @@ class DenseNet(tf.keras.Model):
         x = self.dense2(x)
         return self.classifier(x)
 
-    def train_step(self, data):
-        x_a, x_b, y_a, y_b = data
+    #ABANDON THIS! cant implement with custom train_step. Start to implement custom training step in the future
 
-        task_output_b, task_losses_b = [], []
+    # def train_step(self, data):
+    #     x_a, x_b, y_a, y_b = data
 
-        with tf.GradientTape() as tape:
-            task_output_a =  self(x_a) #forward pass
-            task_loss_a = self.compute_loss(y = y_a, y_pred = task_output_a) #loss
+    #     task_output_b, task_losses_b = [], []
 
-        trainable_vars = self.trainable_variables
-        gradients = tape.gradient(task_loss_a, trainable_vars)
+    #     with tf.GradientTape() as tape:
+    #         task_output_a =  self(x_a) #forward pass
+    #         task_loss_a = self.compute_loss(y = y_a, y_pred = task_output_a) #loss
 
-        # fast_trainbale_vars = [v for v in trainable_vars] #if trainable_weights is a list
-        # fast_weights = self.optimizer.apply_gradients(zip(gradients, fast_trainbale_vars))
+    #     trainable_vars = self.trainable_variables
+    #     gradients = tape.gradient(task_loss_a, trainable_vars)
 
-        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-        output = self(x_b)
-        task_output_b.append(output)
-        task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
+    #     # fast_trainbale_vars = [v for v in trainable_vars] #if trainable_weights is a list
+    #     # fast_weights = self.optimizer.apply_gradients(zip(gradients, fast_trainbale_vars))
 
-        for i in range(5 - 1): #change this 5 to a variable passsed to this class as a self.var in the future
-            loss = self.compute_loss(y = y_a, y_pred = self(x_a))
-            gradients = tape.gradient(loss, trainable_vars)
-            self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-            output = self(x_b)
-            task_output_b.append(output)
-            task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
+    #     self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+    #     output = self(x_b)
+    #     task_output_b.append(output)
+    #     task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
 
-        task_output = [task_output_a, task_output_b, task_loss_a, task_losses_b]
+    #     self.save_weights('./checkpoints/my_checkpoint')
 
+    #     for i in range(5 - 1): #change this 5 to a variable passsed to this class as a self.var in the future
+    #         loss = self.compute_loss(y = y_a, y_pred = self(x_a))
+    #         gradients = tape.gradient(loss, trainable_vars)
+    #         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+    #         output = self(x_b)
+    #         task_output_b.append(output)
+    #         task_losses_b.append(self.compute_loss(y = y_b, y_pred = output))
 
-        pass
+    #     self.load_weights('./checkpoints/my_checkpoint')
+    #     task_output = [task_output_a, task_output_b, task_loss_a, task_losses_b]
+    #     pass

@@ -1,29 +1,40 @@
 import sys
 import os
 
+import tensorflow as tf
+import numpy as np
+
 from sinusoid_data_generator import SinusoidDataGenerator
 
+
 def main():
-    test_num_updates = 5
+    #create a sinusoid data generator with tf.data with a python geenrator
+    num_samples_per_class = 10
+    num_classes_per_task = 5
 
-    update_batch_size = 10 #number of examples used for inner gradient update (K for K-shot learning).
-    meta_batch_size = 25 #number of tasks sampled per meta-update
-    data_generator = SinusoidDataGenerator(update_batch_size*2, meta_batch_size)
+    total_samples = num_samples_per_class * num_classes_per_task
 
-    output_dimension = data_generator.output_dimension
+    sinusoid_data_gen = SinusoidDataGenerator(num_classes_per_task=num_classes_per_task, num_samples_per_class=num_samples_per_class)
+    #sinusoid_data_gen = SinusoidDataGenerator()
 
-    baseline = None
+    ds_sinusoid = tf.data.Dataset.from_generator(
+                        sinusoid_data_gen.generate_sinusoid_batch,
+                        args = [num_samples_per_class],
+                        output_types=(tf.float32, tf.float32, tf.float32, tf.float32),
+                        output_shapes=((), (), (), ())
 
-    if baseline == 'oracle':
-        pass
-    input_dimension = data_generator.input_dimension
+    )
 
+    print(ds_sinusoid.element_spec)
 
-
-    tf_data_load = False
-    input_tensors = None
-    train =True
-
-    model = MAML(dim_input, dim_output, test_num_updates=test_num_updates)
-
+    for step, (init_inputs, outputs, amplitude, phase) in enumerate(ds_sinusoid.batch(num_samples_per_class).take(2)):
+        print("step: ", step)
+        # print('init_inputs.shape: ', init_inputs.shape)
+        # print('outputs.shape: ', outputs.shape)
+        # print('amplitude.shape: ', amplitude.shape)
+        # print('phase.shape: ', phase.shape)
+        print('phase:', phase)
     
+
+if __name__ == '__main__':
+    main()

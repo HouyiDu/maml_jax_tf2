@@ -1,30 +1,77 @@
 import numpy as np
 
-class SinusoidDataGenerator(object):
-    def __init__(self, num_samples_per_class, batch_size, config ={}):
-        self.num_samples_per_class = num_samples_per_class
-        self.batch_size = batch_size
-        
+# class SinusoidDataGenerator:
 
-        self.generator = self.generate_sinusoid_batch
+#     def __init__(self, config ={}):
+        
+#         self.amplitude_range = config.get('amp_range', [0.1, 5.0])
+#         self.phase_range = config.get('phase_range', [0, np.pi])
+#         self.input_range = config.get('input_range', [-5.0, 5.0])
+    
+#     def generate_sinusoid_batch(self):
+#         #return the data for one class
+#         #how many classes per task? Ans: self.num_classes_per_task
+#         #how many samples per class? Ans: self.num_samples_per_class
+#         while True:
+#             amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1])
+#             phase = np.random.uniform(self.phase_range[0], self.phase_range[1])
+
+#             init_inputs = np.random.uniform(self.input_range[0], self.input_range[1])
+#             outputs = amplitude * np.sin(init_inputs - phase)
+                
+#             yield init_inputs, outputs, amplitude, phase
+
+
+class SinusoidDataGenerator(object):
+
+    def __init__(self, num_classes_per_task, num_samples_per_class, config ={}):
+        self.num_samples_per_class = num_samples_per_class
+        self.num_classes_per_task = num_classes_per_task
+        
         self.amplitude_range = config.get('amp_range', [0.1, 5.0])
         self.phase_range = config.get('phase_range', [0, np.pi])
         self.input_range = config.get('input_range', [-5.0, 5.0])
-        self.input_dimension = 1
-        self.output_dimension = 1
     
+    def generate_sinusoid_batch(self, batch_size):
+        amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1])
+        phase = np.random.uniform(self.phase_range[0], self.phase_range[1])
 
-    def generate_sinusoid_batch(self, input_idx = None):
-        amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1], [self.batch_size])
-        phase = np.random.uniform(self.phase_range[0], self.phase_range[1], [self.batch_size])
-        outputs = np.zeros([self.batch_size, self.num_samples_per_class, self.output_dimension])
-        init_inputs = np.zeros([self.batch_size, self.num_samples_per_class, self.input_dimension])
+        i = 0
+        while True:
+            if i >= batch_size:
+            #if i >= self.num_samples_per_class:
+                amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1])
+                phase = np.random.uniform(self.phase_range[0], self.phase_range[1])
+                i = 0
 
-        for sinusoid_func_idx in range(self.batch_size):
-            init_inputs[sinusoid_func_idx] = np.random.uniform(self.input_range[0], self.input_range[1], [self.num_samples_per_class, self.input_dimension])
-            if input_idx is not None:
-                init_inputs[:,input_idx:,0] = np.linspace(self.input_range[0], self.input_range[1], num=self.num_samples_per_class-input_idx)
+            init_inputs = np.random.uniform(self.input_range[0], self.input_range[1])
+            outputs = amplitude * np.sin(init_inputs - phase)
+            
+            yield init_inputs, outputs, amplitude, phase
+            i += 1
 
-            outputs[sinusoid_func_idx] = amplitude[sinusoid_func_idx] * np.sin(init_inputs[sinusoid_func_idx] - phase[sinusoid_func_idx])
+
+# class SinusoidDataGenerator(object):
+#     def __init__(self, num_classes_per_task, num_samples_per_class, config ={}):
+#         self.num_samples_per_class = num_samples_per_class
+#         self.num_classes_per_task = num_classes_per_task
         
-        return init_inputs, outputs, amplitude, phase
+#         self.amplitude_range = config.get('amp_range', [0.1, 5.0])
+#         self.phase_range = config.get('phase_range', [0, np.pi])
+#         self.input_range = config.get('input_range', [-5.0, 5.0])
+
+
+#         self.phase = np.random.uniform(self.phase_range[0], self.phase_range[1])
+#         self.amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1])
+    
+#     def generate_sinusoid_batch(self):
+#         while True:
+#             outputs = np.zeros([self.num_classes_per_task, self.num_samples_per_class ])
+#             inputs = np.zeros([self.num_classes_per_task, self.num_samples_per_class])
+
+#             for sinusoid_func_idx in range(self.num_classes_per_task):
+#                 inputs[sinusoid_func_idx] = np.random.uniform(self.input_range[0], self.input_range[1], [self.num_samples_per_class])
+#                 outputs[sinusoid_func_idx] = self.amplitude[sinusoid_func_idx] * np.sin(inputs[sinusoid_func_idx] - self.phase[sinusoid_func_idx])
+            
+
+#             yield inputs.flatten(), outputs.flatten(), self.amplitude, self.phase
