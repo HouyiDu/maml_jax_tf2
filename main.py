@@ -7,10 +7,12 @@ import numpy as np
 from sinusoid_data_generator import SinusoidDataGenerator
 
 
+
 def main():
     #create a sinusoid data generator with tf.data with a python geenrator
-    num_samples_per_class = 10
-    num_classes_per_task = 5
+    num_samples_per_class = 2
+    num_classes_per_task = 3
+    num_tasks = 2
 
     total_samples = num_samples_per_class * num_classes_per_task
 
@@ -21,18 +23,16 @@ def main():
                         sinusoid_data_gen.generate_sinusoid_batch,
                         args = [num_samples_per_class],
                         output_types=(tf.float32, tf.float32, tf.float32, tf.float32),
-                        output_shapes=((), (), (), ())
+                        output_shapes=((1), (1), (1), (1))
 
     )
 
     print(ds_sinusoid.element_spec)
 
-    for step, (init_inputs, outputs, amplitude, phase) in enumerate(ds_sinusoid.batch(num_samples_per_class).take(2)):
-        print("step: ", step)
-        # print('init_inputs.shape: ', init_inputs.shape)
-        # print('outputs.shape: ', outputs.shape)
-        # print('amplitude.shape: ', amplitude.shape)
-        # print('phase.shape: ', phase.shape)
+    for task_id, (init_inputs, outputs, amplitude, phase) in enumerate(ds_sinusoid.batch(num_samples_per_class * num_classes_per_task).take(num_tasks)):
+        #num_samples_per_class * num_classes_per_task for N-way and K-shot learning
+        print("step: ", task_id)
+        print('outputs: ', outputs)
         print('phase:', phase)
     
 

@@ -33,6 +33,7 @@ class SinusoidDataGenerator(object):
         self.input_range = config.get('input_range', [-5.0, 5.0])
     
     def generate_sinusoid_batch(self, batch_size):
+        #batch_size shall be the same as num_samples_per_class
         amplitude = np.random.uniform(self.amplitude_range[0], self.amplitude_range[1])
         phase = np.random.uniform(self.phase_range[0], self.phase_range[1])
 
@@ -47,7 +48,7 @@ class SinusoidDataGenerator(object):
             init_inputs = np.random.uniform(self.input_range[0], self.input_range[1])
             outputs = amplitude * np.sin(init_inputs - phase)
             
-            yield init_inputs, outputs, amplitude, phase
+            yield [init_inputs], [outputs], [amplitude], [phase]
             i += 1
 
 
