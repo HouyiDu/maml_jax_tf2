@@ -24,3 +24,6 @@ class DenseNet(tf.keras.Model):
         x = self.dense1(inputs)
         x = self.dense2(x)
         return self.classifier(x)
+    
+
+    
